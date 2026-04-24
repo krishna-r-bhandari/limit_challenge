@@ -1,17 +1,30 @@
 'use client';
 
 import {
+  Alert,
+  Button,
   Box,
+  Chip,
   Card,
   CardContent,
   Container,
   Divider,
+  LinearProgress,
   MenuItem,
+  Pagination,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   TextField,
   Typography,
 } from '@mui/material';
-import { useMemo, useState } from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useMemo } from 'react';
 
 import { useBrokerOptions } from '@/lib/hooks/useBrokerOptions';
 import { useSubmissionsList } from '@/lib/hooks/useSubmissions';
@@ -26,21 +39,49 @@ const STATUS_OPTIONS: { label: string; value: SubmissionStatus | '' }[] = [
 ];
 
 export default function SubmissionsPage() {
-  const [status, setStatus] = useState<SubmissionStatus | ''>('');
-  const [brokerId, setBrokerId] = useState('');
-  const [companyQuery, setCompanyQuery] = useState('');
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const status = (searchParams.get('status') as SubmissionStatus | null) ?? '';
+  const brokerId = searchParams.get('brokerId') ?? '';
+  const companyQuery = searchParams.get('companySearch') ?? '';
+  const page = Number(searchParams.get('page') ?? '1');
+
+  const updateSearchParams = (updates: Record<string, string | undefined>) => {
+    const next = new URLSearchParams(searchParams.toString());
+    Object.entries(updates).forEach(([key, value]) => {
+      if (!value) {
+        next.delete(key);
+        return;
+      }
+      next.set(key, value);
+    });
+
+    if (
+      (updates.status !== undefined && updates.status !== status) ||
+      (updates.brokerId !== undefined && updates.brokerId !== brokerId) ||
+      (updates.companySearch !== undefined && updates.companySearch !== companyQuery)
+    ) {
+      next.delete('page');
+    }
+
+    const query = next.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname);
+  };
 
   const filters = useMemo(
     () => ({
       status: status || undefined,
       brokerId: brokerId || undefined,
       companySearch: companyQuery || undefined,
+      page: Number.isNaN(page) || page < 1 ? 1 : page,
     }),
-    [status, brokerId, companyQuery],
+    [status, brokerId, companyQuery, page],
   );
 
   const submissionsQuery = useSubmissionsList(filters);
   const brokerQuery = useBrokerOptions();
+  const totalPages = Math.max(1, Math.ceil((submissionsQuery.data?.count ?? 0) / 10));
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -50,8 +91,7 @@ export default function SubmissionsPage() {
             Submissions
           </Typography>
           <Typography color="text.secondary">
-            Filters update the query parameters and drive backend filtering. Hook these inputs to
-            your API calls when you implement the actual data fetching.
+            Review incoming opportunities and drill into full submission details.
           </Typography>
         </Box>
 
@@ -62,7 +102,9 @@ export default function SubmissionsPage() {
                 select
                 label="Status"
                 value={status}
-                onChange={(event) => setStatus(event.target.value as SubmissionStatus | '')}
+                onChange={(event) =>
+                  updateSearchParams({ status: event.target.value || undefined })
+                }
                 fullWidth
               >
                 {STATUS_OPTIONS.map((option) => (
@@ -75,9 +117,13 @@ export default function SubmissionsPage() {
                 select
                 label="Broker"
                 value={brokerId}
-                onChange={(event) => setBrokerId(event.target.value)}
+                onChange={(event) =>
+                  updateSearchParams({ brokerId: event.target.value || undefined })
+                }
                 fullWidth
-                helperText="Populate options via /api/brokers"
+                helperText={
+                  brokerQuery.isError ? 'Unable to load broker options.' : 'Filter by broker'
+                }
               >
                 <MenuItem value="">All brokers</MenuItem>
                 {brokerQuery.data?.map((broker) => (
@@ -89,9 +135,11 @@ export default function SubmissionsPage() {
               <TextField
                 label="Company search"
                 value={companyQuery}
-                onChange={(event) => setCompanyQuery(event.target.value)}
+                onChange={(event) =>
+                  updateSearchParams({ companySearch: event.target.value || undefined })
+                }
                 fullWidth
-                helperText="Send as ?companySearch=..."
+                helperText="Matches company name and submission summary"
               />
             </Stack>
           </CardContent>
@@ -100,17 +148,102 @@ export default function SubmissionsPage() {
         <Card variant="outlined">
           <CardContent>
             <Stack spacing={2}>
-              <Typography variant="h6">Submission list</Typography>
-              <Typography color="text.secondary">
-                Hook `submissionsQuery` to render rows, totals, and pagination states. The query is
-                disabled by default so no network calls fire until you enable it.
-              </Typography>
-              <Divider />
-              <Box>
-                <pre style={{ margin: 0, fontSize: 14 }}>
-                  {JSON.stringify({ filters, queryKey: submissionsQuery.queryKey }, null, 2)}
-                </pre>
+              <Box display="flex" justifyContent="space-between" alignItems="center" gap={2}>
+                <Typography variant="h6">Submission list</Typography>
+                <Chip
+                  label={`${submissionsQuery.data?.count ?? 0} results`}
+                  color="primary"
+                  variant="outlined"
+                />
               </Box>
+              {submissionsQuery.isFetching && <LinearProgress />}
+              {submissionsQuery.isError && (
+                <Alert
+                  severity="error"
+                  action={
+                    <Button color="inherit" size="small" onClick={() => submissionsQuery.refetch()}>
+                      Retry
+                    </Button>
+                  }
+                >
+                  Could not load submissions. Please verify the backend server is running.
+                </Alert>
+              )}
+              {!submissionsQuery.isError && submissionsQuery.data?.results.length === 0 && (
+                <Alert severity="info">No submissions match these filters.</Alert>
+              )}
+              <Divider />
+              {!submissionsQuery.isError &&
+                submissionsQuery.data &&
+                submissionsQuery.data.results.length > 0 && (
+                  <>
+                    <TableContainer>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Company</TableCell>
+                            <TableCell>Status</TableCell>
+                            <TableCell>Broker</TableCell>
+                            <TableCell>Owner</TableCell>
+                            <TableCell>Documents</TableCell>
+                            <TableCell>Notes</TableCell>
+                            <TableCell>Last Updated</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {submissionsQuery.data.results.map((submission) => (
+                            <TableRow
+                              key={submission.id}
+                              hover
+                              sx={{ '&:last-child td': { borderBottom: 0 } }}
+                            >
+                              <TableCell>
+                                <Stack spacing={0.25}>
+                                  <Typography
+                                    component={Link}
+                                    href={`/submissions/${submission.id}`}
+                                    sx={{
+                                      color: 'primary.main',
+                                      textDecoration: 'none',
+                                      fontWeight: 600,
+                                    }}
+                                  >
+                                    {submission.company.legal_name}
+                                  </Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {submission.summary}
+                                  </Typography>
+                                </Stack>
+                              </TableCell>
+                              <TableCell>
+                                <Chip size="small" label={submission.status.replace('_', ' ')} />
+                              </TableCell>
+                              <TableCell>{submission.broker.name}</TableCell>
+                              <TableCell>{submission.owner.full_name}</TableCell>
+                              <TableCell>{submission.document_count}</TableCell>
+                              <TableCell>{submission.note_count}</TableCell>
+                              <TableCell>
+                                {new Date(submission.updated_at).toLocaleDateString()}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                    <Box display="flex" justifyContent="flex-end" pt={1}>
+                      <Pagination
+                        count={totalPages}
+                        page={Number.isNaN(page) || page < 1 ? 1 : page}
+                        color="primary"
+                        onChange={(_, nextPage) =>
+                          updateSearchParams({
+                            page: nextPage > 1 ? String(nextPage) : undefined,
+                          })
+                        }
+                      />
+                    </Box>
+                  </>
+                )}
             </Stack>
           </CardContent>
         </Card>

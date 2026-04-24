@@ -133,3 +133,27 @@ Visit `http://localhost:3000/submissions` to start building.
 ## Optional Bonus
 
 Authentication, deployment, or extra tooling are not required but welcome if scope allows.
+
+## Candidate Implementation Notes
+
+### Approach
+
+- Implemented end-to-end filtering on the list API for `status`, `brokerId`, and `companySearch`.
+- Added optional backend filters (`createdFrom`, `createdTo`, `hasDocuments`, `hasNotes`) to make the API more realistic for operations workflows.
+- Connected frontend filter controls directly to URL query params so list state is shareable/bookmarkable.
+- Enabled React Query hooks and replaced placeholders with production-oriented list/detail UI states (loading, empty, error, retry).
+- Added paginated list navigation and linked each row to a richer submission detail view.
+
+### Tradeoffs
+
+- Kept pagination UI simple (page controls only) and relied on DRF defaults rather than introducing client-side page-size controls.
+- Prioritized clear, maintainable MUI layout over custom styling to stay focused on product workflow and data handling.
+- Used API field names as-is (snake_case) in the frontend types to avoid unnecessary mapping layers and reduce integration complexity.
+
+### How To Run
+
+- Start backend (`backend/`) and frontend (`frontend/`) as described above.
+- Visit `http://localhost:3000/submissions`.
+- Try filters with URL params, for example:
+  - `?status=in_review`
+  - `?brokerId=2&companySearch=health`

@@ -6,7 +6,7 @@ from submissions.filters.submission import SubmissionFilterSet
 
 
 class SubmissionViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = models.Submission.objects.all()
+    queryset = models.Submission.objects.select_related("broker", "company", "owner")
     filterset_class = SubmissionFilterSet
 
     def get_queryset(self):
@@ -21,8 +21,10 @@ class SubmissionViewSet(viewsets.ReadOnlyModelViewSet):
                 latest_note_body=Subquery(latest_note.values("body")[:1]),
                 latest_note_created_at=Subquery(latest_note.values("created_at")[:1]),
             )
+        else:
+            queryset = queryset.prefetch_related("contacts", "documents", "notes")
 
-        return queryset
+        return queryset.distinct()
 
     def get_serializer_class(self):
         if self.action == "list":

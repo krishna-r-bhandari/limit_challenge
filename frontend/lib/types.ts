@@ -4,26 +4,26 @@ export type SubmissionPriority = 'high' | 'medium' | 'low';
 export interface Broker {
   id: number;
   name: string;
-  primaryContactEmail: string | null;
+  primary_contact_email: string | null;
 }
 
 export interface Company {
   id: number;
-  legalName: string;
+  legal_name: string;
   industry: string;
-  headquartersCity: string;
+  headquarters_city: string;
 }
 
 export interface TeamMember {
   id: number;
-  fullName: string;
+  full_name: string;
   email: string;
 }
 
 export interface NoteSummary {
-  authorName: string;
-  bodyPreview: string;
-  createdAt: string;
+  author_name: string;
+  body_preview: string;
+  created_at: string;
 }
 
 export interface SubmissionListItem {
@@ -31,14 +31,14 @@ export interface SubmissionListItem {
   status: SubmissionStatus;
   priority: SubmissionPriority;
   summary: string;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
   broker: Broker;
   company: Company;
   owner: TeamMember;
-  documentCount: number;
-  noteCount: number;
-  latestNote: NoteSummary | null;
+  document_count: number;
+  note_count: number;
+  latest_note: NoteSummary | null;
 }
 
 export interface Contact {
@@ -52,21 +52,21 @@ export interface Contact {
 export interface Document {
   id: number;
   title: string;
-  docType: string;
-  uploadedAt: string;
-  fileUrl: string;
+  doc_type: string;
+  uploaded_at: string;
+  file_url: string;
 }
 
 export interface NoteDetail {
   id: number;
-  authorName: string;
+  author_name: string;
   body: string;
-  createdAt: string;
+  created_at: string;
 }
 
 export interface SubmissionDetail extends Omit<
   SubmissionListItem,
-  'documentCount' | 'noteCount' | 'latestNote'
+  'document_count' | 'note_count' | 'latest_note'
 > {
   contacts: Contact[];
   documents: Document[];
@@ -84,4 +84,5 @@ export interface SubmissionListFilters {
   status?: SubmissionStatus;
   brokerId?: string;
   companySearch?: string;
+  page?: number;
 }
