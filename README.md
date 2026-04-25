@@ -148,7 +148,7 @@ Authentication, deployment, or extra tooling are not required but welcome if sco
 
 - Kept pagination UI simple (page controls only) and relied on DRF defaults rather than introducing client-side page-size controls.
 - Prioritized clear, maintainable MUI layout over custom styling to stay focused on product workflow and data handling.
-- Used API field names as-is (snake_case) in the frontend types to avoid unnecessary mapping layers and reduce integration complexity.
+- Used API field names as-is (camelCase) in the frontend types to avoid unnecessary mapping layers and reduce integration complexity.
 
 ### How To Run
 
