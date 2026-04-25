@@ -11,10 +11,13 @@ const featureSx = {
   p: 2.5,
   borderRadius: 2.5,
   border: '1px solid',
-  borderColor: 'rgba(15, 23, 42, 0.08)',
-  bgcolor: 'rgba(255, 255, 255, 0.7)',
+  borderColor: 'divider',
+  bgcolor: 'background.paper',
   backdropFilter: 'blur(8px)',
-  boxShadow: '0 4px 24px rgba(15, 23, 42, 0.06)',
+  boxShadow: (theme: { palette: { mode: string } }) =>
+    theme.palette.mode === 'dark'
+      ? '0 6px 24px rgba(0, 0, 0, 0.35)'
+      : '0 4px 24px rgba(15, 23, 42, 0.06)',
 };
 
 export default function HomePage() {
@@ -30,13 +33,7 @@ export default function HomePage() {
       }}
     >
       <Container maxWidth="lg">
-        <Stack
-          spacing={1}
-          sx={{ mb: 1.5 }}
-          direction="row"
-          alignItems="center"
-          flexWrap="wrap"
-        >
+        <Stack spacing={1} sx={{ mb: 1.5 }} direction="row" alignItems="center" flexWrap="wrap">
           <Box
             component="span"
             sx={{
@@ -49,8 +46,9 @@ export default function HomePage() {
               letterSpacing: '0.06em',
               textTransform: 'uppercase',
               color: 'primary.main',
-              bgcolor: 'rgba(49, 46, 129, 0.08)',
-              border: '1px solid rgba(49, 46, 129, 0.12)',
+              bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1F1F1F' : '#DBEAFE'),
+              border: '1px solid',
+              borderColor: (theme) => (theme.palette.mode === 'dark' ? '#3A3A3A' : '#BFDBFE'),
             }}
           >
             Operations
@@ -73,7 +71,7 @@ export default function HomePage() {
           <Box
             component="span"
             sx={{
-              background: 'linear-gradient(90deg, #4f46e5, #0ea5e9)',
+              background: 'linear-gradient(90deg, #3B82F6, #22C55E)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
@@ -87,8 +85,8 @@ export default function HomePage() {
           color="text.secondary"
           sx={{ maxWidth: 520, lineHeight: 1.7, fontSize: '1.05rem', mb: 4 }}
         >
-          Review incoming submissions, filter the pipeline, and open full context—contacts, documents, and
-          notes—in one place.
+          Review incoming submissions, filter the pipeline, and open full context—contacts,
+          documents, and notes—in one place.
         </Typography>
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: 6 }}>

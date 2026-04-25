@@ -15,7 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'Submission Tracker',
-  description: 'Review broker submissions, filter the pipeline, and inspect full opportunity context.',
+  description:
+    'Review broker submissions, filter the pipeline, and inspect full opportunity context.',
 };
 
 export default function RootLayout({

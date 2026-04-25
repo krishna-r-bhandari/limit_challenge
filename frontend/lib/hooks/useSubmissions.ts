@@ -38,7 +38,10 @@ export function useSubmissionsList(filters: SubmissionListFilters) {
   return useQuery({
     queryKey: [SUBMISSIONS_QUERY_KEY, filters] as QueryKey,
     queryFn: () => fetchSubmissions(filters),
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
     placeholderData: (previousData) => previousData,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -47,7 +50,9 @@ export function useSubmissionDetail(id: string | number) {
     queryKey: [SUBMISSIONS_QUERY_KEY, id],
     queryFn: () => fetchSubmissionDetail(id),
     enabled: Boolean(id),
-    staleTime: 60_000,
+    staleTime: 2 * 60_000,
+    gcTime: 10 * 60_000,
+    retry: 1,
   });
 }
 

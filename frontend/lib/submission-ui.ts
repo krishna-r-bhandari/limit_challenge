@@ -1,14 +1,12 @@
 import { SubmissionStatus } from '@/lib/types';
 
-export const statusStyles: Record<
-  SubmissionStatus,
-  { label: string; bg: string; color: string }
-> = {
-  new: { label: 'New', bg: 'rgba(124, 58, 237, 0.12)', color: '#5b21b6' },
-  in_review: { label: 'In Review', bg: 'rgba(37, 99, 235, 0.12)', color: '#1d4ed8' },
-  closed: { label: 'Closed Won', bg: 'rgba(22, 163, 74, 0.12)', color: '#15803d' },
-  lost: { label: 'Lost', bg: 'rgba(100, 116, 139, 0.12)', color: '#64748b' },
-};
+export const statusStyles: Record<SubmissionStatus, { label: string; bg: string; color: string }> =
+  {
+    new: { label: 'New', bg: 'rgba(59, 130, 246, 0.15)', color: '#3B82F6' },
+    in_review: { label: 'In Review', bg: 'rgba(245, 158, 11, 0.15)', color: '#F59E0B' },
+    closed: { label: 'Closed Won', bg: 'rgba(34, 197, 94, 0.15)', color: '#22C55E' },
+    lost: { label: 'Lost', bg: 'rgba(239, 68, 68, 0.15)', color: '#EF4444' },
+  };
 
 export function initialsFromName(name: string) {
   return name

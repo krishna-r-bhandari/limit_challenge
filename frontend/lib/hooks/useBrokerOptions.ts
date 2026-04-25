@@ -17,5 +17,7 @@ export function useBrokerOptions() {
     queryKey: ['brokers'],
     queryFn: fetchBrokers,
     staleTime: 5 * 60_000,
+    gcTime: 15 * 60_000,
+    refetchOnWindowFocus: false,
   });
 }
