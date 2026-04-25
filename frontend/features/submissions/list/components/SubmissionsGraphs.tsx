@@ -1,13 +1,19 @@
 'use client';
 
-import { Box, Paper, Stack, Typography } from '@mui/material';
+import { Box, Paper, Skeleton, Stack, Typography } from '@mui/material';
 import { useMemo } from 'react';
 
 import { SubmissionListItem, SubmissionStatus } from '@/lib/types';
 
 type SubmissionsGraphsProps = {
   results: SubmissionListItem[];
+  onStatusClick: (status: SubmissionStatus) => void;
+  isLoading?: boolean;
 };
+
+type StatusDistributionChartProps = Pick<SubmissionsGraphsProps, 'results' | 'onStatusClick'>;
+
+type IndustryBreakdownChartProps = Pick<SubmissionsGraphsProps, 'results'>;
 
 const STATUS_LABELS: Record<SubmissionStatus, string> = {
   new: 'New',
@@ -23,7 +29,7 @@ const STATUS_COLORS: Record<SubmissionStatus, string> = {
   lost: '#EF4444',
 };
 
-function StatusDistributionChart({ results }: SubmissionsGraphsProps) {
+function StatusDistributionChart({ results, onStatusClick }: StatusDistributionChartProps) {
   const data = useMemo(() => {
     const counts: Record<SubmissionStatus, number> = {
       new: 0,
@@ -51,7 +57,16 @@ function StatusDistributionChart({ results }: SubmissionsGraphsProps) {
       </Typography>
       <Stack spacing={1.25}>
         {data.map((item) => (
-          <Box key={item.status}>
+          <Box
+            key={item.status}
+            role="button"
+            tabIndex={0}
+            onClick={() => onStatusClick(item.status)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') onStatusClick(item.status);
+            }}
+            sx={{ cursor: 'pointer' }}
+          >
             <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
               <Typography variant="body2" color="text.secondary">
                 {item.label}
@@ -86,7 +101,7 @@ function StatusDistributionChart({ results }: SubmissionsGraphsProps) {
   );
 }
 
-function IndustryBreakdownChart({ results }: SubmissionsGraphsProps) {
+function IndustryBreakdownChart({ results }: IndustryBreakdownChartProps) {
   const rows = useMemo(() => {
     const counts = new Map<string, number>();
 
@@ -162,7 +177,38 @@ function IndustryBreakdownChart({ results }: SubmissionsGraphsProps) {
   );
 }
 
-export function SubmissionsGraphs({ results }: SubmissionsGraphsProps) {
+export function SubmissionsGraphs({
+  results,
+  onStatusClick,
+  isLoading = false,
+}: SubmissionsGraphsProps) {
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          mt: 2,
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' },
+          gap: 1.5,
+        }}
+      >
+        {[0, 1].map((index) => (
+          <Paper key={index} sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>
+            <Skeleton variant="text" width="50%" height={28} sx={{ mb: 1 }} />
+            <Stack spacing={1.25}>
+              <Skeleton variant="text" width="95%" />
+              <Skeleton variant="rounded" height={10} />
+              <Skeleton variant="text" width="92%" />
+              <Skeleton variant="rounded" height={10} />
+              <Skeleton variant="text" width="88%" />
+              <Skeleton variant="rounded" height={10} />
+            </Stack>
+          </Paper>
+        ))}
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{
@@ -172,7 +218,7 @@ export function SubmissionsGraphs({ results }: SubmissionsGraphsProps) {
         gap: 1.5,
       }}
     >
-      <StatusDistributionChart results={results} />
+      <StatusDistributionChart results={results} onStatusClick={onStatusClick} />
       <IndustryBreakdownChart results={results} />
     </Box>
   );

@@ -109,6 +109,17 @@ function SubmissionListCardComponent({ submission, selected, onClick }: Props) {
       >
         {submission.summary}
       </Typography>
+      <Stack direction="row" spacing={0.75} flexWrap="wrap" sx={{ mt: 1.25 }}>
+        {submission.documentCount === 0 ? (
+          <Chip size="small" label="Missing docs" color="warning" variant="outlined" />
+        ) : null}
+        {submission.noteCount === 0 ? (
+          <Chip size="small" label="No notes" color="info" variant="outlined" />
+        ) : null}
+        {submission.status === 'in_review' && submission.noteCount < 2 ? (
+          <Chip size="small" label="Needs follow-up" color="error" variant="outlined" />
+        ) : null}
+      </Stack>
 
       <Stack direction="row" flexWrap="wrap" gap={2} alignItems="center" sx={{ mt: 1.5 }}>
         <Stack direction="row" alignItems="center" spacing={0.5} color="text.secondary">

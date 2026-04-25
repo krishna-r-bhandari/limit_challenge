@@ -138,17 +138,28 @@ Authentication, deployment, or extra tooling are not required but welcome if sco
 
 ### Approach
 
-- Implemented end-to-end filtering on the list API for `status`, `brokerId`, and `companySearch`.
-- Added optional backend filters (`createdFrom`, `createdTo`, `hasDocuments`, `hasNotes`) to make the API more realistic for operations workflows.
-- Connected frontend filter controls directly to URL query params so list state is shareable/bookmarkable.
-- Enabled React Query hooks and replaced placeholders with production-oriented list/detail UI states (loading, empty, error, retry).
-- Added paginated list navigation and linked each row to a richer submission detail view.
+- Implemented end-to-end filtering on the list API for `status`, `brokerId`, `companySearch`, plus optional filters (`createdFrom`, `createdTo`, `hasDocuments`, `hasNotes`).
+- Connected all primary filter controls to URL query params so list state is shareable/bookmarkable and browser-navigation friendly.
+- Added client-side productivity features on top of API responses: saved views (localStorage + modal), CSV export (current page), interactive status graph drill-down, and preview drawer.
+- Built polished list/detail experiences with structured sections, timeline context, and resilient loading/error/empty states using skeleton UIs.
+- Added dark/light theming (dark default) with consistent surface/text/border tokens and a global mode toggle in the submissions header.
 
 ### Tradeoffs
 
 - Kept pagination UI simple (page controls only) and relied on DRF defaults rather than introducing client-side page-size controls.
-- Prioritized clear, maintainable MUI layout over custom styling to stay focused on product workflow and data handling.
+- Kept sorting on the currently loaded page (client-side) to avoid changing backend ordering contracts during challenge scope.
+- Prioritized clear, maintainable MUI layout over bespoke charting/state libraries to keep implementation straightforward and readable.
 - Used API field names as-is (camelCase) in the frontend types to avoid unnecessary mapping layers and reduce integration complexity.
+
+### Stretch Goals Implemented
+
+- Dark/light mode with dark as default.
+- Dashboard-style metric cards with icons and submission graphs.
+- Saved filter views with apply + modal-based save flow.
+- CSV export for filtered current-page results.
+- Quick detail preview drawer from list cards.
+- Timeline section in detail page.
+- Skeleton loading states across list and detail surfaces.
 
 ### How To Run
 
@@ -157,3 +168,4 @@ Authentication, deployment, or extra tooling are not required but welcome if sco
 - Try filters with URL params, for example:
   - `?status=in_review`
   - `?brokerId=2&companySearch=health`
+  - `?createdFrom=2026-04-01&createdTo=2026-04-30&hasDocuments=true&hasNotes=false`

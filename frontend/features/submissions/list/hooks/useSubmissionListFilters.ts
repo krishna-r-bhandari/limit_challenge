@@ -7,6 +7,16 @@ import { useDebouncedValue } from '@/lib/hooks/useDebouncedValue';
 import { SubmissionListFilters, SubmissionStatus } from '@/lib/types';
 
 type FilterUpdates = Record<string, string | undefined>;
+type SavedViewPayload = {
+  status?: string;
+  brokerId?: string;
+  companySearch?: string;
+  createdFrom?: string;
+  createdTo?: string;
+  hasDocuments?: string;
+  hasNotes?: string;
+  sortBy?: string;
+};
 
 export function useSubmissionListFilters() {
   const router = useRouter();
@@ -16,6 +26,11 @@ export function useSubmissionListFilters() {
   const status = (searchParams.get('status') as SubmissionStatus | null) ?? '';
   const brokerId = searchParams.get('brokerId') ?? '';
   const companySearch = searchParams.get('companySearch') ?? '';
+  const createdFrom = searchParams.get('createdFrom') ?? '';
+  const createdTo = searchParams.get('createdTo') ?? '';
+  const hasDocuments = searchParams.get('hasDocuments') ?? '';
+  const hasNotes = searchParams.get('hasNotes') ?? '';
+  const sortBy = searchParams.get('sortBy') ?? 'updated_desc';
   const page = Number(searchParams.get('page') ?? '1');
   const safePage = Number.isNaN(page) || page < 1 ? 1 : page;
 
@@ -36,7 +51,11 @@ export function useSubmissionListFilters() {
       if (
         (updates.status !== undefined && updates.status !== status) ||
         (updates.brokerId !== undefined && updates.brokerId !== brokerId) ||
-        (updates.companySearch !== undefined && updates.companySearch !== companySearch)
+        (updates.companySearch !== undefined && updates.companySearch !== companySearch) ||
+        (updates.createdFrom !== undefined && updates.createdFrom !== createdFrom) ||
+        (updates.createdTo !== undefined && updates.createdTo !== createdTo) ||
+        (updates.hasDocuments !== undefined && updates.hasDocuments !== hasDocuments) ||
+        (updates.hasNotes !== undefined && updates.hasNotes !== hasNotes)
       ) {
         next.delete('page');
       }
@@ -44,7 +63,18 @@ export function useSubmissionListFilters() {
       const query = next.toString();
       router.replace(query ? `${pathname}?${query}` : pathname);
     },
-    [brokerId, companySearch, pathname, router, searchParams, status],
+    [
+      brokerId,
+      companySearch,
+      createdFrom,
+      createdTo,
+      hasDocuments,
+      hasNotes,
+      pathname,
+      router,
+      searchParams,
+      status,
+    ],
   );
 
   useEffect(() => {
@@ -63,15 +93,41 @@ export function useSubmissionListFilters() {
       status: status || undefined,
       brokerId: brokerId || undefined,
       companySearch: companySearch || undefined,
+      createdFrom: createdFrom || undefined,
+      createdTo: createdTo || undefined,
+      hasDocuments: hasDocuments ? hasDocuments === 'true' : undefined,
+      hasNotes: hasNotes ? hasNotes === 'true' : undefined,
       page: safePage,
     }),
-    [brokerId, companySearch, safePage, status],
+    [brokerId, companySearch, createdFrom, createdTo, hasDocuments, hasNotes, safePage, status],
   );
 
   const handlers = useMemo(
     () => ({
       onStatusChange: (value: string) => updateSearchParams({ status: value || undefined }),
       onBrokerChange: (value: string) => updateSearchParams({ brokerId: value || undefined }),
+      onCreatedFromChange: (value: string) =>
+        updateSearchParams({ createdFrom: value || undefined }),
+      onCreatedToChange: (value: string) => updateSearchParams({ createdTo: value || undefined }),
+      onHasDocumentsChange: (value: string) =>
+        updateSearchParams({ hasDocuments: value || undefined }),
+      onHasNotesChange: (value: string) => updateSearchParams({ hasNotes: value || undefined }),
+      onSortByChange: (value: string) => updateSearchParams({ sortBy: value || undefined }),
+      onApplySavedView: (view: SavedViewPayload) => {
+        const nextSearch = view.companySearch ?? '';
+        setSearchInput(nextSearch);
+        updateSearchParams({
+          status: view.status || undefined,
+          brokerId: view.brokerId || undefined,
+          companySearch: nextSearch || undefined,
+          createdFrom: view.createdFrom || undefined,
+          createdTo: view.createdTo || undefined,
+          hasDocuments: view.hasDocuments || undefined,
+          hasNotes: view.hasNotes || undefined,
+          sortBy: view.sortBy || undefined,
+          page: undefined,
+        });
+      },
       onSearchInputChange: setSearchInput,
       onPageChange: (nextPage: number) =>
         updateSearchParams({ page: nextPage > 1 ? String(nextPage) : undefined }),
@@ -81,6 +137,11 @@ export function useSubmissionListFilters() {
           status: undefined,
           brokerId: undefined,
           companySearch: undefined,
+          createdFrom: undefined,
+          createdTo: undefined,
+          hasDocuments: undefined,
+          hasNotes: undefined,
+          sortBy: undefined,
           page: undefined,
         });
       },
@@ -92,6 +153,11 @@ export function useSubmissionListFilters() {
     status,
     brokerId,
     searchInput,
+    createdFrom,
+    createdTo,
+    hasDocuments,
+    hasNotes,
+    sortBy,
     safePage,
     filters,
     ...handlers,
