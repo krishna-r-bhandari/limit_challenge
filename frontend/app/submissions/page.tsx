@@ -9,6 +9,7 @@ import {
   DialogTitle,
   TextField,
 } from '@mui/material';
+import { useRouter } from 'next/navigation';
 import { Suspense, useCallback, useMemo, useState } from 'react';
 
 import { SubmissionsFilters } from '@/features/submissions/list/components/SubmissionsFilters';
@@ -33,6 +34,7 @@ export default function SubmissionsPageWrapper() {
 }
 
 function SubmissionsPage() {
+  const router = useRouter();
   const {
     status,
     brokerId,
@@ -173,6 +175,7 @@ function SubmissionsPage() {
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <Box sx={{ maxWidth: 1180, mx: 'auto', px: { xs: 2, md: 4 }, py: 4 }}>
         <SubmissionsPageHeader
+          onBack={() => router.push('/')}
           onApplySavedView={applySavedView}
           onSaveCurrentView={() => setSaveViewOpen(true)}
           savedViewNames={savedViewNames}

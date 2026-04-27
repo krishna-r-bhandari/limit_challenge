@@ -1,10 +1,12 @@
 'use client';
 
 import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import { Box, Button, MenuItem, Select, Skeleton, Stack, Tooltip, Typography } from '@mui/material';
 import ThemeModeToggle from '@/components/theme/ThemeModeToggle';
 
 type SubmissionsPageHeaderProps = {
+  onBack: () => void;
   onApplySavedView: (viewName: string) => void;
   onSaveCurrentView: () => void;
   savedViewNames: string[];
@@ -12,6 +14,7 @@ type SubmissionsPageHeaderProps = {
 };
 
 export function SubmissionsPageHeader({
+  onBack,
   onApplySavedView,
   onSaveCurrentView,
   savedViewNames,
@@ -29,6 +32,15 @@ export function SubmissionsPageHeader({
           </>
         ) : (
           <>
+            <Button
+              variant="text"
+              size="small"
+              startIcon={<ArrowBackRoundedIcon />}
+              onClick={onBack}
+              sx={{ mb: 0.75, px: 0, minWidth: 'fit-content' }}
+            >
+              Back
+            </Button>
             <Typography sx={{ fontSize: { xs: 28, md: 34 }, fontWeight: 800 }}>
               Submission Tracker
             </Typography>
